@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Laba - Interactive Esports Platform</title>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <style>
+    :root {
+      --bg-dark: #060913;
+      --card-bg: #0f172a;
+      --accent-mazzo: #10b981;
+      --accent-cupo: #3b82f6;
+      --accent-game: #f43f5e;
+      --text-main: #f8fafc;
+      --glow-mazzo: 0 0 25px rgba(16, 185, 129, 0.5);
+      --glow-cupo: 0 0 25px rgba(59, 130, 246, 0.5);
+      --glow-game: 0 0 25px rgba(244, 63, 94, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #060913 80%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    h1, h2, h3 {
+      text-align: center;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+
+    .btn {
+      background: #1e293b;
+      color: white;
+      border: 1px solid #334155;
+      padding: 14px 28px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin: 5px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn:hover {
+      transform: translateY(-3px) scale(1.03);
+    }
+
+    .btn-danger { background: linear-gradient(135deg, #e11d48, #9f1239); border: none; box-shadow: var(--glow-game); }
+    .btn-mazzo { background: linear-gradient(135deg, #10b981, #047857); border: none; color: #fff; box-shadow: var(--glow-mazzo); }
+    .btn-cupo { background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: none; color: #fff; box-shadow: var(--glow-cupo); }
+    .btn-game { background: linear-gradient(135deg, #f43f5e, #be123c); border: none; box-shadow: var(--glow-game); }
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid #1e293b;
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 25px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(12px);
+    }
+
+    /* Character Cards */
+    .character-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-top: 25px;
+    }
+
+    .char-card {
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      border: 2px solid #334155;
+      border-radius: 20px;
+      padding: 35px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      position: relative;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .char-card:hover { transform: translateY(-10px) scale(1.02); }
+    .char-card.mazzo-theme:hover { border-color: var(--accent-mazzo); box-shadow: var(--glow-mazzo); }
+    .char-card.cupo-theme:hover { border-color: var(--accent-cupo); box-shadow: var(--glow-cupo); }
+    .char-card.game-theme:hover { border-color: var(--accent-game); box-shadow: var(--glow-game); }
+
+    .char-card h3 { margin-bottom: 8px; font-size: 28px; font-weight: 800; }
+    .char-card p { font-size: 15px; color: #94a3b8; }
+
+    /* Members Grid Cards */
+    .members-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .member-card {
+      background: #090d16;
+      border: 2px solid #1e293b;
+      border-radius: 16px;
+      padding: 25px 15px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .member-card.status-alive {
+      border-color: #10b981;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+    }
+
+    .member-card.status-dead {
+      border-color: #ef4444;
+      opacity: 0.5;
+      background: #180a0e;
+    }
+
+    .member-card h4 { font-size: 22px; margin-bottom: 6px; }
+
+    /* Real Voice Call UI */
+    .call-container {
+      background: #070a13;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .call-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 10px;
+    }
+
+    .call-users {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .call-user-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border: 2px solid #3b82f6;
+      position: relative;
+    }
+
+    .call-user-avatar.active-mic {
+      border-color: #10b981;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+    }
+
+    /* Chat Section */
+    .chat-box {
+      height: 250px;
+      overflow-y: auto;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 15px;
+      background: #05070e;
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .chat-msg {
+      background: #0f172a;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border-left: 4px solid var(--accent-game);
+      max-width: 85%;
+    }
+
+    /* Lock Screen Timer */
+    #lock-screen {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(4, 6, 12, 0.97);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .timer-display {
+      font-size: 85px;
+      font-weight: 900;
+      text-align: center;
+      color: var(--accent-game);
+      margin: 15px 0;
+      font-family: monospace;
+      text-shadow: var(--glow-game);
+    }
+
+    #floating-timer-widget {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #1e1b2e;
+      border: 2px solid var(--accent-game);
+      border-radius: 16px;
+      padding: 12px 25px;
+      z-index: 99999;
+      box-shadow: var(--glow-game);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #floating-timer-widget .time {
+      font-size: 26px;
+      font-weight: bold;
+      color: var(--accent-game);
+      font-family: monospace;
+    }
+
+    /* Custom Steal Modal */
+    #steal-modal {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 100001;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .steal-card {
+      background: #0f172a;
+      border: 2px solid var(--accent-game);
+      border-radius: 20px;
+      padding: 30px;
+      width: 90%;
+      max-width: 450px;
+      text-align: center;
+      box-shadow: var(--glow-game);
+    }
+
+    .steal-select {
+      width: 100%;
+      padding: 14px;
+      margin: 20px 0;
+      border-radius: 10px;
+      background: #060913;
+      color: white;
+      border: 1px solid #334155;
+      font-size: 16px;
+    }
+
+    #winner-modal {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: #000;
+      z-index: 100000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    video {
+      max-width: 90%;
+      max-height: 80vh;
+      border-radius: 16px;
+    }
+
+    .hidden { display: none !important; }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+    .status-active { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+    .status-lost { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+  </style>
+</head>
+<body>
+
+<div id="remote-audio-container"></div>
+
+<div class="container">
+  <div id="screen-login" class="card">
+    <h1>🎮 EL LABA - SELECT YOUR CARD</h1>
+    <div class="character-grid">
+      <div class="char-card mazzo-theme" onclick="selectRole('Mazzo')">
+        <h3 style="color: var(--accent-mazzo);">Mazzo 👑</h3>
+        <p>Captain - Team Mazzo</p>
+      </div>
+      <div class="char-card mazzo-theme" onclick="selectRole('Noha')">
+        <h3 style="color: var(--accent-mazzo);">Noha 🎯</h3>
+        <p>Member - Team Mazzo</p>
+      </div>
+      <div class="char-card cupo-theme" onclick="selectRole('Cupo')">
+        <h3 style="color: var(--accent-cupo);">Cupo 👑</h3>
+        <p>Captain - Team Cupo</p>
+      </div>
+      <div class="char-card cupo-theme" onclick="selectRole('Khlood')">
+        <h3 style="color: var(--accent-cupo);">Khlood 🎯</h3>
+        <p>Member - Team Cupo</p>
+      </div>
+      <div class="char-card game-theme" onclick="selectRole('The Game S')">
+        <h3 style="color: var(--accent-game);">The Game S 🕹️</h3>
+        <p>Game Master / Control</p>
+      </div>
+      <div class="char-card game-theme" onclick="selectRole('The Game Y')">
+        <h3 style="color: var(--accent-game);">The Game Y 🕹️</h3>
+        <p>Game Master / Control</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-main" class="hidden">
+    <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+      <div>Current Character: <b id="user-display-name" style="font-size: 20px; color: var(--accent-cupo);"></b></div>
+      <button id="btn-change-char" class="btn btn-danger" onclick="logout()">Change Character 🔄</button>
+    </div>
+
+    <div id="admin-panel" class="card hidden">
+      <h2 style="color: var(--accent-game);">🔥 Game Masters Control Panel</h2>
+      <div style="display: flex; gap: 10px; margin: 15px 0;">
+        <input type="text" id="game-msg-input" style="flex: 1; padding: 14px; border-radius: 10px; border: 1px solid #334155; background: #070a13; color: white;" placeholder="Type challenge or announcement for the group...">
+        <button class="btn btn-game" onclick="sendGameMessage()">Send Write</button>
+      </div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-danger" onclick="startTimerPrompt()">Start Timer & Lock Screens ⏳</button>
+        <button class="btn" onclick="stopTimer()">Stop Timer 🛑</button>
+        <button class="btn" onclick="resetGame()">Reset Game 🔄</button>
+      </div>
+    </div>
+
+    <div id="captain-powers" class="card hidden">
+      <h3>⚡ Captain Powers</h3>
+      <div id="power-buttons" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+        <button id="btn-power-steal" class="btn" onclick="openStealModal()">Steal Player (1x)</button>
+        <button id="btn-power-minus" class="btn" onclick="usePowerMinus()">Play Short-handed (2x)</button>
+        <button id="btn-power-delay" class="btn" onclick="usePowerDelay()">Delay Opponents 3 Mins (1x)</button>
+      </div>
+    </div>
+
+    <div class="call-container">
+      <div class="call-header">
+        <span style="font-weight: bold; color: #10b981;">🔊 Live Voice Call (WebRTC Peer-to-Peer)</span>
+        <div>
+          <button id="btn-toggle-mic" class="btn btn-mazzo" style="padding: 8px 18px; font-size: 14px;" onclick="toggleRealMic()">Turn On Mic 🎙️</button>
+        </div>
+      </div>
+      <div class="call-users" id="call-users-status">
+        <div class="call-user-avatar" id="avatar-Mazzo">M</div>
+        <div class="call-user-avatar" id="avatar-Noha">N</div>
+        <div class="call-user-avatar" id="avatar-Cupo">C</div>
+        <div class="call-user-avatar" id="avatar-Khlood">K</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>💬 Official Game Chat</h3>
+      <div class="chat-box" id="chat-box"></div>
+    </div>
+
+    <div class="card">
+      <h3>📊 Member Status Cards</h3>
+      <div id="members-cards-container" class="members-grid"></div>
+    </div>
+  </div>
+</div>
+
+<div id="steal-modal" class="hidden">
+  <div class="steal-card">
+    <h2 style="color: var(--accent-game);">⚡ Steal Opposing Member</h2>
+    <p style="color: #94a3b8; margin-top: 8px;">Select a member from the opposing team to steal:</p>
+    <select id="steal-select-input" class="steal-select"></select>
+    <div style="display: flex; justify-content: center; gap: 10px;">
+      <button class="btn btn-game" onclick="confirmStealPower()">Confirm Steal</button>
+      <button class="btn" onclick="closeStealModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="floating-timer-widget" class="hidden">
+  <span>Challenge Active ⏳</span>
+  <div class="time" id="floating-timer-time">00:00</div>
+</div>
+
+<div id="lock-screen" class="hidden">
+  <h1 style="color: var(--accent-game); font-size: 36px;">🚨 CHALLENGE STARTED! 🚨</h1>
+  <div class="timer-display" id="lock-timer">00:00</div>
+
+  <div id="captain-timer-view" class="hidden" style="width: 100%; max-width: 850px; margin: 15px 0;">
+    <h3 style="margin-bottom: 10px; color: #94a3b8;">Monitor Live Member Status:</h3>
+    <div id="captain-timer-members-grid" class="members-grid"></div>
+    <div style="text-align: center; margin-top: 15px;">
+      <button class="btn btn-danger" onclick="logout()">Change Character 🔄</button>
+    </div>
+  </div>
+
+  <button id="btn-lost-timer" class="btn btn-danger hidden" style="font-size: 22px; padding: 16px 45px; margin-top: 15px;" onclick="markAsLost()">LOST BUTTON ❌</button>
+</div>
+
+<div id="winner-modal" class="hidden">
+  <h1 id="winner-title" style="color: #f59e0b; margin-bottom: 15px;">WINNING TEAM!</h1>
+  <video id="winner-video" controls autoplay>
+    <source src="WhatsApp Video 2026-09-12 at 11.02.53 PM.mp4" type="video/mp4">
+  </video>
+  <button class="btn" style="margin-top: 15px;" onclick="closeWinnerModal()">Close Window</button>
+</div>
+
+<script>
+  const defaultState = {
+    timerRunning: false,
+    timerSeconds: 0,
+    messages: [],
+    powersUsed: {
+      Mazzo: { steal: false, minusCount: 0, delay: false },
+      Cupo: { steal: false, minusCount: 0, delay: false }
+    },
+    playersStatus: {
+      Mazzo: true,
+      Noha: true,
+      Cupo: true,
+      Khlood: true
+    },
+    winner: null
+  };
+
+  let currentUser = localStorage.getItem('game_user') || null;
+  let peer = null;
+  let localStream = null;
+  let isMicActive = false;
+
+  function getState() {
+    return JSON.parse(localStorage.getItem('game_state')) || defaultState;
+  }
+
+  function saveState(state) {
+    localStorage.setItem('game_state', JSON.stringify(state));
+    window.dispatchEvent(new Event('storage'));
+  }
+
+  function selectRole(role) {
+    currentUser = role;
+    localStorage.setItem('game_user', role);
+    initVoiceCall();
+    renderUI();
+  }
+
+  function logout() {
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+    }
+    currentUser = null;
+    localStorage.removeItem('game_user');
+    renderUI();
+  }
+
+  function initVoiceCall() {
+    if (!currentUser) return;
+    const peerId = 'el-laba-' + currentUser.replace(/\s+/g, '-').toLowerCase();
+    peer = new Peer(peerId);
+
+    peer.on('open', (id) => {
+      console.log('Peer Connected: ' + id);
+    });
+
+    peer.on('call', (call) => {
+      call.answer(localStream);
+      call.on('stream', (remoteStream) => {
+        addRemoteAudio(call.peer, remoteStream);
+      });
+    });
+  }
+
+  async function toggleRealMic() {
+    const btn = document.getElementById('btn-toggle-mic');
+
+    if (!isMicActive) {
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        isMicActive = true;
+        btn.innerText = "Mute Mic 🔇";
+        btn.className = "btn btn-danger";
+
+        const avatar = document.getElementById(`avatar-${currentUser}`);
+        if (avatar) avatar.classList.add('active-mic');
+
+        const allRoles = ['Mazzo', 'Noha', 'Cupo', 'Khlood'];
+        allRoles.forEach(role => {
+          if (role !== currentUser) {
+            const targetPeerId = 'el-laba-' + role.toLowerCase();
+            const call = peer.call(targetPeerId, localStream);
+            if (call) {
+              call.on('stream', (remoteStream) => {
+                addRemoteAudio(targetPeerId, remoteStream);
+              });
+            }
+          }
+        });
+
+      } catch (err) {
+        alert("Please grant microphone permissions to use voice call!");
+      }
+    } else {
+      if (localStream) {
+        localStream.getAudioTracks().forEach(track => track.enabled = false);
+      }
+      isMicActive = false;
+      btn.innerText = "Turn On Mic 🎙️";
+      btn.className = "btn btn-mazzo";
+
+      const avatar = document.getElementById(`avatar-${currentUser}`);
+      if (avatar) avatar.classList.remove('active-mic');
+    }
+  }
+
+  function addRemoteAudio(peerId, stream) {
+    let container = document.getElementById('remote-audio-container');
+    let audioElem = document.getElementById(`audio-${peerId}`);
+    if (!audioElem) {
+      audioElem = document.createElement('audio');
+      audioElem.id = `audio-${peerId}`;
+      audioElem.autoplay = true;
+      container.appendChild(audioElem);
+    }
+    audioElem.srcObject = stream;
+  }
+
+  function resetGame() {
+    if (confirm("Reset the entire game state?")) {
+      saveState(defaultState);
+      location.reload();
+    }
+  }
+
+  /* Steal Power with Dynamic Select Options */
+  function openStealModal() {
+    const select = document.getElementById('steal-select-input');
+    select.innerHTML = '';
+
+    // تحديد الفريق الخصم بناءً على الكابتن الحالي
+    const opposingTeamMembers = (currentUser === 'Mazzo') 
+      ? ['Cupo', 'Khlood'] 
+      : ['Mazzo', 'Noha'];
+
+    opposingTeamMembers.forEach(memberName => {
+      const option = document.createElement('option');
+      option.value = memberName;
+      option.innerText = memberName;
+      select.appendChild(option);
+    });
+
+    document.getElementById('steal-modal').classList.remove('hidden');
+  }
+
+  function closeStealModal() {
+    document.getElementById('steal-modal').classList.add('hidden');
+  }
+
+  function confirmStealPower() {
+    const target = document.getElementById('steal-select-input').value;
+    if (target) {
+      let state = getState();
+      state.powersUsed[currentUser].steal = true;
+      state.messages.push({ sender: 'SYSTEM ⚡', text: `Captain ${currentUser} used Steal Player power and stole ${target}!` });
+      saveState(state);
+      closeStealModal();
+    }
+  }
+
+  function usePowerMinus() {
+    let state = getState();
+    if (state.powersUsed[currentUser].minusCount < 2) {
+      state.powersUsed[currentUser].minusCount++;
+      state.messages.push({ sender: 'SYSTEM ⚡', text: `Captain ${currentUser} used Play Short-Handed power!` });
+      saveState(state);
+    }
+  }
+
+  function usePowerDelay() {
+    let state = getState();
+    state.powersUsed[currentUser].delay = true;
+    state.messages.push({ sender: 'SYSTEM ⚡', text: `Captain ${currentUser} delayed opposing team by 3 mins!` });
+    saveState(state);
+  }
+
+  function sendGameMessage() {
+    const input = document.getElementById('game-msg-input');
+    const text = input.value.trim();
+    if (text) {
+      let state = getState();
+      state.messages.push({ sender: currentUser, text: text });
+      saveState(state);
+      input.value = '';
+    }
+  }
+
+  function startTimerPrompt() {
+    let minutes = prompt("Enter challenge time in minutes:", "5");
+    if (minutes && !isNaN(minutes)) {
+      let state = getState();
+      state.timerSeconds = parseInt(minutes) * 60;
+      state.timerRunning = true;
+      saveState(state);
+    }
+  }
+
+  function stopTimer() {
+    let state = getState();
+    state.timerRunning = false;
+    saveState(state);
+  }
+
+  function markAsLost() {
+    let state = getState();
+    if (currentUser && state.playersStatus[currentUser] !== undefined) {
+      state.playersStatus[currentUser] = false;
+
+      const mazzoDefeated = !state.playersStatus.Mazzo && !state.playersStatus.Noha;
+      const cupoDefeated = !state.playersStatus.Cupo && !state.playersStatus.Khlood;
+
+      if (mazzoDefeated) {
+        state.winner = 'Team Cupo';
+      } else if (cupoDefeated) {
+        state.winner = 'Team Mazzo';
+      }
+
+      saveState(state);
+    }
+  }
+
+  function closeWinnerModal() {
+    document.getElementById('winner-modal').classList.add('hidden');
+    document.getElementById('winner-video').pause();
+  }
+
+  function buildMembersCardsHTML(playersStatus) {
+    const members = [
+      { name: 'Mazzo', team: 'Team Mazzo', role: 'Captain' },
+      { name: 'Noha', team: 'Team Mazzo', role: 'Member' },
+      { name: 'Cupo', team: 'Team Cupo', role: 'Captain' },
+      { name: 'Khlood', team: 'Team Cupo', role: 'Member' }
+    ];
+
+    return members.map(m => {
+      const isAlive = playersStatus[m.name];
+      return `
+        <div class="member-card ${isAlive ? 'status-alive' : 'status-dead'}">
+          <h4>${m.name}</h4>
+          <p style="font-size: 13px; color: #94a3b8;">${m.team} (${m.role})</p>
+          <span class="status-badge ${isAlive ? 'status-active' : 'status-lost'}">
+            ${isAlive ? 'ALIVE 🟢' : 'LOST ❌'}
+          </span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  function renderUI() {
+    const state = getState();
+
+    if (!currentUser) {
+      document.getElementById('screen-login').classList.remove('hidden');
+      document.getElementById('screen-main').classList.add('hidden');
+      document.getElementById('floating-timer-widget').classList.add('hidden');
+      return;
+    }
+
+    document.getElementById('screen-login').classList.add('hidden');
+    document.getElementById('screen-main').classList.remove('hidden');
+    document.getElementById('user-display-name').innerText = currentUser;
+
+    const isGameMaster = (currentUser === 'The Game S' || currentUser === 'The Game Y');
+    const isCaptain = (currentUser === 'Mazzo' || currentUser === 'Cupo');
+    const isPlayer = (isCaptain || currentUser === 'Noha' || currentUser === 'Khlood');
+
+    document.getElementById('admin-panel').classList.toggle('hidden', !isGameMaster);
+    document.getElementById('captain-powers').classList.toggle('hidden', !isCaptain);
+
+    if (isCaptain) {
+      const powers = state.powersUsed[currentUser];
+      document.getElementById('btn-power-steal').disabled = powers.steal;
+      document.getElementById('btn-power-minus').disabled = powers.minusCount >= 2;
+      document.getElementById('btn-power-delay').disabled = powers.delay;
+    }
+
+    const chatBox = document.getElementById('chat-box');
+    chatBox.innerHTML = '';
+    state.messages.forEach(msg => {
+      const div = document.createElement('div');
+      div.className = 'chat-msg';
+      div.innerHTML = `<span class="sender" style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px; font-weight: bold;">${msg.sender}</span><div>${msg.text}</div>`;
+      chatBox.appendChild(div);
+    });
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    const cardsHTML = buildMembersCardsHTML(state.playersStatus);
+    document.getElementById('members-cards-container').innerHTML = cardsHTML;
+
+    const lockScreen = document.getElementById('lock-screen');
+    const floatingWidget = document.getElementById('floating-timer-widget');
+    const playerIsAlive = state.playersStatus[currentUser] ?? true;
+
+    if (state.timerRunning) {
+      const formattedTime = formatTime(state.timerSeconds);
+      document.getElementById('lock-timer').innerText = formattedTime;
+      document.getElementById('floating-timer-time').innerText = formattedTime;
+
+      if (isPlayer && !playerIsAlive) {
+        lockScreen.classList.add('hidden');
+        floatingWidget.classList.remove('hidden');
+      } else if (!isGameMaster) {
+        lockScreen.classList.remove('hidden');
+        floatingWidget.classList.add('hidden');
+      } else {
+        lockScreen.classList.add('hidden');
+        floatingWidget.classList.add('hidden');
+      }
+
+      document.getElementById('btn-lost-timer').classList.toggle('hidden', !isPlayer);
+      document.getElementById('captain-timer-view').classList.toggle('hidden', !isCaptain);
+      if (isCaptain) {
+        document.getElementById('captain-timer-members-grid').innerHTML = cardsHTML;
+      }
+    } else {
+      lockScreen.classList.add('hidden');
+      floatingWidget.classList.add('hidden');
+    }
+
+    if (state.winner) {
+      const modal = document.getElementById('winner-modal');
+      const title = document.getElementById('winner-title');
+      const video = document.getElementById('winner-video');
+
+      if (state.winner === 'Team Mazzo') {
+        title.innerText = "🏆 WINNER: Team Mazzo!";
+        video.classList.remove('hidden');
+      } else {
+        title.innerText = "🏆 WINNER: Team Cupo!";
+        video.classList.add('hidden');
+      }
+      modal.classList.remove('hidden');
+    }
+  }
+
+  setInterval(() => {
+    let state = getState();
+    if (state.timerRunning && state.timerSeconds > 0) {
+      state.timerSeconds--;
+      if (state.timerSeconds <= 0) {
+        state.timerRunning = false;
+      }
+      saveState(state);
+    }
+  }, 1000);
+
+  window.addEventListener('storage', renderUI);
+  renderUI();
+  if (currentUser) initVoiceCall();
+</script>
+</body>
+</html>
