@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>El Laba - Interactive Esports Platform</title>
+  <title>EL L'eba - Interactive Esports Platform</title>
+  <!-- PeerJS Library for Real Audio & Data Connection -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <style>
     :root {
@@ -53,26 +54,22 @@
       background: #1e293b;
       color: white;
       border: 1px solid #334155;
-      padding: 14px 28px;
+      padding: 12px 24px;
       border-radius: 12px;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: bold;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      margin: 5px;
+      margin: 4px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      position: relative;
+      z-index: 10;
     }
 
-    .btn:hover {
-      transform: translateY(-3px) scale(1.03);
-    }
+    .btn:hover { transform: translateY(-2px) scale(1.02); }
+    .btn:active { transform: translateY(1px) scale(0.98); }
 
-    .btn-small {
-      padding: 6px 14px;
-      font-size: 14px;
-      border-radius: 8px;
-    }
-
+    .btn-small { padding: 6px 12px; font-size: 13px; border-radius: 8px; }
     .btn-danger { background: linear-gradient(135deg, #e11d48, #9f1239); border: none; box-shadow: var(--glow-game); }
     .btn-mazzo { background: linear-gradient(135deg, #10b981, #047857); border: none; color: #fff; box-shadow: var(--glow-mazzo); }
     .btn-cupo { background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: none; color: #fff; box-shadow: var(--glow-cupo); }
@@ -84,7 +81,7 @@
       background: var(--card-bg);
       border: 1px solid #1e293b;
       border-radius: 20px;
-      padding: 28px;
+      padding: 25px;
       margin-bottom: 25px;
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(12px);
@@ -107,13 +104,7 @@
       margin-top: 15px;
     }
 
-    .score-team {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-    }
-
+    .score-team { display: flex; flex-direction: column; align-items: center; gap: 5px; }
     .score-team h3 { margin: 0; font-size: 24px; }
     .score-number { font-size: 55px; font-weight: 900; font-family: monospace; }
     .score-vs { font-size: 28px; font-weight: bold; color: var(--accent-game); }
@@ -129,83 +120,55 @@
       flex-wrap: wrap;
     }
 
-    .score-input-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
+    .score-input-group { display: flex; align-items: center; gap: 8px; }
     .score-input {
-      width: 70px;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #334155;
-      background: #060913;
-      color: white;
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
+      width: 70px; padding: 8px; border-radius: 10px; border: 1px solid #334155;
+      background: #060913; color: white; text-align: center; font-size: 18px; font-weight: bold;
     }
 
     .character-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 25px;
-      margin-top: 25px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
     }
 
     .char-card {
       background: linear-gradient(145deg, #0f172a, #1e293b);
       border: 2px solid #334155;
       border-radius: 20px;
-      padding: 35px 20px;
+      padding: 30px 20px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.4s ease;
-      position: relative;
-      min-height: 180px;
+      transition: all 0.3s ease;
+      min-height: 160px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
     }
 
-    .char-card:hover { transform: translateY(-10px) scale(1.02); }
+    .char-card:hover { transform: translateY(-8px) scale(1.02); }
     .char-card.mazzo-theme:hover { border-color: var(--accent-mazzo); box-shadow: var(--glow-mazzo); }
     .char-card.cupo-theme:hover { border-color: var(--accent-cupo); box-shadow: var(--glow-cupo); }
     .char-card.game-theme:hover { border-color: var(--accent-game); box-shadow: var(--glow-game); }
 
-    .char-card h3 { margin-bottom: 8px; font-size: 28px; font-weight: 800; }
-    .char-card p { font-size: 15px; color: #94a3b8; }
+    .char-card h3 { margin-bottom: 6px; font-size: 26px; font-weight: 800; }
+    .char-card p { font-size: 14px; color: #94a3b8; }
 
-    .members-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+    /* Dynamic User Display Colors */
+    .user-green {
+      color: #10b981 !important;
+      text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
     }
-
-    .member-card {
-      background: #090d16;
-      border: 2px solid #1e293b;
-      border-radius: 16px;
-      padding: 25px 15px;
-      text-align: center;
-      transition: all 0.3s ease;
+    .user-red {
+      color: #f43f5e !important;
+      text-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
     }
-
-    .member-card.status-alive {
-      border-color: #10b981;
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+    .user-blue {
+      color: #3b82f6 !important;
+      text-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
     }
-
-    .member-card.status-dead {
-      border-color: #ef4444;
-      opacity: 0.5;
-      background: #180a0e;
-    }
-
-    .member-card h4 { font-size: 22px; margin-bottom: 6px; }
 
     .call-container {
       background: #070a13;
@@ -213,6 +176,8 @@
       border-radius: 16px;
       padding: 20px;
       margin-bottom: 20px;
+      position: relative;
+      z-index: 20;
     }
 
     .call-header {
@@ -222,17 +187,32 @@
       margin-bottom: 15px;
       border-bottom: 1px solid #1e293b;
       padding-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
     .call-users {
       display: flex;
       gap: 15px;
       flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .call-user-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      min-width: 120px;
     }
 
     .call-user-avatar {
-      width: 60px;
-      height: 60px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       background: #1e293b;
       display: flex;
@@ -240,16 +220,22 @@
       justify-content: center;
       font-weight: bold;
       border: 2px solid #3b82f6;
-      position: relative;
+      transition: all 0.3s ease;
     }
 
-    .call-user-avatar.active-mic {
-      border-color: #10b981;
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+    .voice-changer-select {
+      background: #060913;
+      color: var(--accent-game);
+      border: 1px solid #334155;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: bold;
+      outline: none;
     }
 
     .chat-box {
-      height: 250px;
+      height: 220px;
       overflow-y: auto;
       border: 1px solid #1e293b;
       border-radius: 12px;
@@ -258,16 +244,34 @@
       margin-bottom: 15px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .chat-msg {
       background: #0f172a;
-      padding: 12px 16px;
+      padding: 10px 14px;
       border-radius: 12px;
       border-left: 4px solid var(--accent-game);
       max-width: 85%;
     }
+
+    .members-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .member-card {
+      background: #090d16;
+      border: 2px solid #1e293b;
+      border-radius: 16px;
+      padding: 20px 12px;
+      text-align: center;
+    }
+
+    .member-card.status-alive { border-color: #10b981; }
+    .member-card.status-dead { border-color: #ef4444; opacity: 0.5; }
 
     #lock-screen {
       position: fixed;
@@ -282,99 +286,38 @@
     }
 
     .timer-display {
-      font-size: 85px;
-      font-weight: 900;
-      text-align: center;
-      color: var(--accent-game);
-      margin: 15px 0;
-      font-family: monospace;
-      text-shadow: var(--glow-game);
+      font-size: 80px; font-weight: 900; text-align: center;
+      color: var(--accent-game); margin: 15px 0; font-family: monospace;
     }
 
     #floating-timer-widget {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #1e1b2e;
-      border: 2px solid var(--accent-game);
-      border-radius: 16px;
-      padding: 12px 25px;
-      z-index: 99999;
-      box-shadow: var(--glow-game);
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      position: fixed; top: 20px; right: 20px; background: #1e1b2e;
+      border: 2px solid var(--accent-game); border-radius: 16px; padding: 10px 20px;
+      z-index: 99999; display: flex; align-items: center; gap: 10px;
     }
 
-    #floating-timer-widget .time {
-      font-size: 26px;
-      font-weight: bold;
-      color: var(--accent-game);
-      font-family: monospace;
-    }
+    #floating-timer-widget .time { font-size: 24px; font-weight: bold; color: var(--accent-game); font-family: monospace; }
 
-    #steal-modal {
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 100001;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    #steal-modal, #winner-modal {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.9); z-index: 100000;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;
     }
 
     .steal-card {
-      background: #0f172a;
-      border: 2px solid var(--accent-game);
-      border-radius: 20px;
-      padding: 30px;
-      width: 90%;
-      max-width: 450px;
-      text-align: center;
-      box-shadow: var(--glow-game);
+      background: #0f172a; border: 2px solid var(--accent-game);
+      border-radius: 20px; padding: 30px; width: 90%; max-width: 420px; text-align: center;
     }
 
     .steal-select {
-      width: 100%;
-      padding: 14px;
-      margin: 20px 0;
-      border-radius: 10px;
-      background: #060913;
-      color: white;
-      border: 1px solid #334155;
-      font-size: 16px;
+      width: 100%; padding: 12px; margin: 15px 0; border-radius: 10px;
+      background: #060913; color: white; border: 1px solid #334155;
     }
 
-    #winner-modal {
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0, 0, 0, 0.95);
-      z-index: 100000;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    video {
-      max-width: 90%;
-      max-height: 65vh;
-      border-radius: 16px;
-      box-shadow: 0 0 35px rgba(245, 158, 11, 0.5);
-      background: #000;
-    }
-
+    video { max-width: 90%; max-height: 60vh; border-radius: 16px; background: #000; }
     .hidden { display: none !important; }
 
-    .status-badge {
-      display: inline-block;
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: bold;
-      margin-top: 8px;
-    }
+    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-top: 6px; }
     .status-active { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
     .status-lost { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
   </style>
@@ -384,8 +327,9 @@
 <div id="remote-audio-container"></div>
 
 <div class="container">
+  <!-- 1. Character Selection Screen -->
   <div id="screen-login" class="card">
-    <h1>🎮 EL LABA - SELECT YOUR CHARACTER</h1>
+    <h1>🎮 EL L'eba - SELECT YOUR CHARACTER</h1>
     <div class="character-grid">
       <div class="char-card mazzo-theme" onclick="selectRole('Mazzo')">
         <h3 style="color: var(--accent-mazzo);">Mazzo 👑</h3>
@@ -414,14 +358,16 @@
     </div>
   </div>
 
+  <!-- 2. Main Dashboard -->
   <div id="screen-main" class="hidden">
-    <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
-      <div>Current Character: <b id="user-display-name" style="font-size: 20px; color: var(--accent-cupo);"></b></div>
+    <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+      <div>Current Character: <b id="user-display-name" style="font-size: 22px; font-weight: 800;"></b></div>
       <button id="btn-change-char" class="btn btn-danger" onclick="logout()">Change Character 🔄</button>
     </div>
 
+    <!-- Live Score Sheet Card -->
     <div class="score-sheet-card">
-      <h2 style="color: var(--accent-score);">🏆 OFFICIAL SCORE SHEET 🏆</h2>
+      <h2 style="color: var(--accent-score);">🏆 OFFICIAL SCORE SHEET - EL L'eba 🏆</h2>
       <div class="score-board">
         <div class="score-team">
           <h3 style="color: var(--accent-mazzo);">Team Mazzo</h3>
@@ -453,11 +399,12 @@
       </div>
     </div>
 
+    <!-- Admin Control Panel -->
     <div id="admin-panel" class="card hidden">
       <h2 style="color: var(--accent-game);">🔥 Game Masters Control Panel</h2>
       <div style="display: flex; gap: 10px; margin: 15px 0;">
-        <input type="text" id="game-msg-input" style="flex: 1; padding: 14px; border-radius: 10px; border: 1px solid #334155; background: #070a13; color: white;" placeholder="Type challenge or announcement for the group...">
-        <button class="btn btn-game" onclick="sendGameMessage()">Send Write</button>
+        <input type="text" id="game-msg-input" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #070a13; color: white;" placeholder="Type challenge or announcement for the group..." onkeypress="if(event.key==='Enter') sendGameMessage()">
+        <button class="btn btn-game" onclick="sendGameMessage()">Send Announcement</button>
       </div>
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <button class="btn btn-danger" onclick="startTimerPrompt()">Start Timer & Lock Screens ⏳</button>
@@ -466,6 +413,7 @@
       </div>
     </div>
 
+    <!-- Captain Powers -->
     <div id="captain-powers" class="card hidden">
       <h3>⚡ Captain Powers</h3>
       <div id="power-buttons" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
@@ -475,26 +423,36 @@
       </div>
     </div>
 
+    <!-- Voice Call System -->
     <div class="call-container">
       <div class="call-header">
-        <span style="font-weight: bold; color: #10b981;">🔊 Live Voice Call (WebRTC Peer-to-Peer)</span>
-        <div>
-          <button id="btn-toggle-mic" class="btn btn-mazzo" style="padding: 8px 18px; font-size: 14px;" onclick="toggleRealMic()">Turn On Mic 🎙️</button>
+        <span style="font-weight: bold; color: #10b981; font-size: 18px;">🔊 Voice Call & Network</span>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+          <select id="voice-effect-select" class="voice-changer-select hidden" onchange="changeVoiceEffect()">
+            <option value="normal">🎙️ Normal Voice</option>
+            <option value="hacker">💻 Hacker Voice (Robot/Glitch)</option>
+          </select>
+
+          <button id="btn-call-group" class="btn btn-game hidden" onclick="startGroupCall()">Call All / Connect Mic 📞</button>
+          <button id="btn-end-call" class="btn btn-danger hidden" onclick="endCurrentCall()">End Call 🔴</button>
+          <button id="btn-toggle-mic" class="btn btn-mazzo" onclick="toggleRealMic()">Turn On Mic 🎙️</button>
         </div>
       </div>
-      <div class="call-users" id="call-users-status">
-        <div class="call-user-avatar" id="avatar-Mazzo">M</div>
-        <div class="call-user-avatar" id="avatar-Noha">N</div>
-        <div class="call-user-avatar" id="avatar-Cupo">C</div>
-        <div class="call-user-avatar" id="avatar-Khlood">K</div>
+
+      <div class="call-users" id="call-users-status"></div>
+    </div>
+
+    <!-- Official Group Chat -->
+    <div class="card">
+      <h3>💬 EL L'eba Official Chat</h3>
+      <div class="chat-box" id="chat-box"></div>
+      <div style="display: flex; gap: 10px; margin-top: 10px;" id="user-chat-input-container">
+        <input type="text" id="user-msg-input" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #070a13; color: white;" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendUserChatMessage()">
+        <button class="btn btn-mazzo" onclick="sendUserChatMessage()">Send 📩</button>
       </div>
     </div>
 
-    <div class="card">
-      <h3>💬 Official Game Chat</h3>
-      <div class="chat-box" id="chat-box"></div>
-    </div>
-
+    <!-- Status Cards -->
     <div class="card">
       <h3>📊 Member Status Cards</h3>
       <div id="members-cards-container" class="members-grid"></div>
@@ -502,6 +460,7 @@
   </div>
 </div>
 
+<!-- Steal Player Modal -->
 <div id="steal-modal" class="hidden">
   <div class="steal-card">
     <h2 style="color: var(--accent-game);">⚡ Steal Opposing Member</h2>
@@ -514,11 +473,13 @@
   </div>
 </div>
 
+<!-- Floating Widget Timer -->
 <div id="floating-timer-widget" class="hidden">
   <span>Challenge Active ⏳</span>
   <div class="time" id="floating-timer-time">00:00</div>
 </div>
 
+<!-- Lock Screen & Challenge Timer -->
 <div id="lock-screen" class="hidden">
   <h1 style="color: var(--accent-game); font-size: 36px;">🚨 CHALLENGE STARTED! 🚨</h1>
   <div class="timer-display" id="lock-timer">00:00</div>
@@ -531,20 +492,19 @@
     </div>
   </div>
 
-  <button id="btn-lost-timer" class="btn btn-danger hidden" style="font-size: 22px; padding: 16px 45px; margin-top: 15px;" onclick="markAsLost()">LOST BUTTON ❌</button>
+  <button id="btn-lost-timer" class="btn btn-danger hidden" style="font-size: 20px; padding: 14px 40px; margin-top: 15px;" onclick="markAsLost()">LOST BUTTON ❌</button>
 </div>
 
+<!-- Winner Modal Video -->
 <div id="winner-modal" class="hidden">
-  <h1 id="winner-title" style="color: #f59e0b; margin-bottom: 15px; font-size: 32px;">🏆 WINNING TEAM! 🏆</h1>
-  
+  <h1 id="winner-title" style="color: #f59e0b; margin-bottom: 15px; font-size: 30px;">🏆 WINNING TEAM! 🏆</h1>
   <video id="winner-video" controls playsinline preload="auto" onended="closeWinnerModal()">
     <source src="winner.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
-  
   <div style="display: flex; gap: 15px; margin-top: 20px;">
-    <button class="btn btn-mazzo" style="font-size: 18px; padding: 12px 30px;" onclick="forcePlayVideo()">Play Video 🎬</button>
-    <button class="btn btn-danger" style="font-size: 18px; padding: 12px 30px;" onclick="closeWinnerModal()">Close ✖️</button>
+    <button class="btn btn-mazzo" style="font-size: 16px; padding: 10px 25px;" onclick="forcePlayVideo()">Play Video 🎬</button>
+    <button class="btn btn-danger" style="font-size: 16px; padding: 10px 25px;" onclick="closeWinnerModal()">Close ✖️</button>
   </div>
 </div>
 
@@ -553,143 +513,304 @@
     timerRunning: false,
     timerSeconds: 0,
     messages: [],
-    score: {
-      mazzo: 0,
-      cupo: 0
-    },
+    score: { mazzo: 0, cupo: 0 },
     powersUsed: {
       Mazzo: { steal: false, minusCount: 0, delay: false },
       Cupo: { steal: false, minusCount: 0, delay: false }
     },
-    playersStatus: {
-      Mazzo: true,
-      Noha: true,
-      Cupo: true,
-      Khlood: true
-    },
+    playersStatus: { Mazzo: true, Noha: true, Cupo: true, Khlood: true },
     winner: null
   };
 
-  let currentUser = localStorage.getItem('game_user') || null;
+  const ALL_ROLES = ['Mazzo', 'Noha', 'Cupo', 'Khlood', 'The Game S', 'The Game Y'];
+  let currentUser = localStorage.getItem('elleba_user') || null;
   let peer = null;
-  let localStream = null;
+  let dataConnections = {};
+  let activeMediaCalls = [];
+  let rawMicStream = null;
   let processedStream = null;
   let isMicActive = false;
-  let videoPlayed = false;
+  let handledWinnerState = null;
+
+  /* Audio API */
+  let audioCtx = null;
+  let audioSource = null;
+  let audioDestination = null;
+  let biquadFilter = null;
+  let distortionNode = null;
+  let currentEffect = 'normal';
 
   function getState() {
-    return JSON.parse(localStorage.getItem('game_state')) || defaultState;
+    return JSON.parse(localStorage.getItem('elleba_state')) || defaultState;
   }
 
-  function saveState(state) {
-    localStorage.setItem('game_state', JSON.stringify(state));
-    window.dispatchEvent(new Event('storage'));
+  function saveState(state, broadcast = true) {
+    localStorage.setItem('elleba_state', JSON.stringify(state));
+    renderUI();
+    if (broadcast) broadcastData({ type: 'SYNC_STATE', state: state });
+  }
+
+  function broadcastData(data) {
+    Object.keys(dataConnections).forEach(peerId => {
+      if (dataConnections[peerId] && dataConnections[peerId].open) {
+        dataConnections[peerId].send(data);
+      }
+    });
+  }
+
+  function getCleanId(roleName) {
+    return 'el-leba-v6-' + roleName.toLowerCase().replace(/[^a-z0-9]/g, '-');
   }
 
   function selectRole(role) {
     currentUser = role;
-    localStorage.setItem('game_user', role);
-    initVoiceCall();
+    localStorage.setItem('elleba_user', role);
+    initPeerNetwork();
     renderUI();
   }
 
   function logout() {
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
-    }
+    endCurrentCall();
+    if (peer) peer.destroy();
     currentUser = null;
-    localStorage.removeItem('game_user');
+    localStorage.removeItem('elleba_user');
     renderUI();
   }
 
-  function initVoiceCall() {
+  function initPeerNetwork() {
     if (!currentUser) return;
-    const peerId = 'el-laba-' + currentUser.replace(/\s+/g, '-').toLowerCase();
-    peer = new Peer(peerId);
+    const peerId = getCleanId(currentUser);
 
-    peer.on('open', (id) => {
-      console.log('Peer Connected: ' + id);
+    // Google & Public STUN Servers for Web / GitHub Pages
+    peer = new Peer(peerId, {
+      debug: 1,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' },
+          { urls: 'stun:stun3.l.google.com:19302' },
+          { urls: 'stun:stun4.l.google.com:19302' }
+        ]
+      }
     });
 
-    peer.on('call', (call) => {
-      call.answer(processedStream || localStream);
+    peer.on('open', (id) => {
+      connectToAllPeers();
+    });
+
+    peer.on('connection', (conn) => { setupDataConnection(conn); });
+
+    peer.on('call', async (call) => {
+      try {
+        if (!rawMicStream) {
+          await ensureAudioStream();
+        }
+      } catch (e) {}
+      
+      call.answer(processedStream || rawMicStream);
+      activeMediaCalls.push(call);
+      document.getElementById('btn-end-call').classList.remove('hidden');
+
       call.on('stream', (remoteStream) => {
         addRemoteAudio(call.peer, remoteStream);
+      });
+
+      call.on('close', () => {
+        removeRemoteAudio(call.peer);
       });
     });
   }
 
-  function applyGameMasterVoiceEffect(rawStream) {
-    const isGameMaster = (currentUser === 'The Game S' || currentUser === 'The Game Y');
-    if (!isGameMaster) return rawStream;
+  function connectToAllPeers() {
+    ALL_ROLES.forEach(role => {
+      if (role !== currentUser) {
+        const targetId = getCleanId(role);
+        const conn = peer.connect(targetId, { reliable: true });
+        if (conn) setupDataConnection(conn);
+      }
+    });
+  }
 
-    try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const source = audioCtx.createMediaStreamSource(rawStream);
-      
-      const filter = audioCtx.createBiquadFilter();
-      filter.type = "lowshelf";
-      filter.frequency.value = 350;
-      filter.gain.value = 25;
+  function setupDataConnection(conn) {
+    dataConnections[conn.peer] = conn;
+    conn.on('open', () => { conn.send({ type: 'SYNC_STATE', state: getState() }); });
+    conn.on('data', (data) => {
+      if (data.type === 'SYNC_STATE') {
+        localStorage.setItem('elleba_state', JSON.stringify(data.state));
+        renderUI();
+      }
+    });
+  }
 
-      const filter2 = audioCtx.createBiquadFilter();
-      filter2.type = "peaking";
-      filter2.frequency.value = 800;
-      filter2.Q.value = 6;
-      filter2.gain.value = 15;
-
-      const destination = audioCtx.createMediaStreamDestination();
-      source.connect(filter);
-      filter.connect(filter2);
-      filter2.connect(destination);
-
-      return destination.stream;
-    } catch (e) {
-      return rawStream;
+  async function ensureAudioStream() {
+    if (!rawMicStream) {
+      rawMicStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
     }
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      await audioCtx.resume();
+    }
+    applyVoiceEffect();
+  }
+
+  function changeVoiceEffect() {
+    const isGameMaster = (currentUser === 'The Game S' || currentUser === 'The Game Y');
+    if (!isGameMaster) return;
+
+    currentEffect = document.getElementById('voice-effect-select').value;
+    if (rawMicStream) {
+      applyVoiceEffect();
+    }
+  }
+
+  function applyVoiceEffect() {
+    if (!rawMicStream || !audioCtx) return;
+
+    if (audioSource) {
+      try { audioSource.disconnect(); } catch(e){}
+    }
+
+    audioSource = audioCtx.createMediaStreamSource(rawMicStream);
+    audioDestination = audioCtx.createMediaStreamDestination();
+
+    let lastNode = audioSource;
+    const isGameMaster = (currentUser === 'The Game S' || currentUser === 'The Game Y');
+
+    if (isGameMaster && currentEffect === 'hacker') {
+      biquadFilter = audioCtx.createBiquadFilter();
+      biquadFilter.type = 'bandpass';
+      biquadFilter.frequency.value = 1200;
+      biquadFilter.Q.value = 4;
+
+      distortionNode = audioCtx.createWaveShaper();
+      distortionNode.curve = makeDistortionCurve(60);
+
+      lastNode.connect(biquadFilter);
+      biquadFilter.connect(distortionNode);
+      lastNode = distortionNode;
+    }
+
+    lastNode.connect(audioDestination);
+    processedStream = audioDestination.stream;
+
+    activeMediaCalls.forEach(call => {
+      const sender = call.peerConnection.getSenders().find(s => s.track && s.track.kind === 'audio');
+      if (sender && (processedStream || rawMicStream).getAudioTracks()[0]) {
+        sender.replaceTrack((processedStream || rawMicStream).getAudioTracks()[0]);
+      }
+    });
+  }
+
+  function makeDistortionCurve(amount) {
+    let k = typeof amount === 'number' ? amount : 50,
+      n_samples = 44100,
+      curve = new Float32Array(n_samples),
+      deg = Math.PI / 180,
+      i = 0,
+      x;
+    for (; i < n_samples; ++i) {
+      x = (i * 2) / n_samples - 1;
+      curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+    }
+    return curve;
+  }
+
+  async function startGroupCall() {
+    try {
+      await ensureAudioStream();
+      isMicActive = true;
+      const btn = document.getElementById('btn-toggle-mic');
+      btn.innerText = "Mute Mic 🔇"; btn.className = "btn btn-danger";
+
+      ALL_ROLES.forEach(role => {
+        if (role !== currentUser) {
+          callIndividualUser(role, false);
+        }
+      });
+      document.getElementById('btn-end-call').classList.remove('hidden');
+    } catch (err) {
+      alert("Microphone permission required!");
+    }
+  }
+
+  async function callSingleUser(targetRole) {
+    try {
+      await ensureAudioStream();
+      isMicActive = true;
+      const btn = document.getElementById('btn-toggle-mic');
+      btn.innerText = "Mute Mic 🔇"; btn.className = "btn btn-danger";
+
+      callIndividualUser(targetRole, true);
+    } catch (err) {
+      alert("Microphone permission required!");
+    }
+  }
+
+  function callIndividualUser(targetRole, showEndButton = true) {
+    const targetPeerId = getCleanId(targetRole);
+    const streamToPass = processedStream || rawMicStream;
+    const call = peer.call(targetPeerId, streamToPass);
+    if (call) {
+      activeMediaCalls.push(call);
+      call.on('stream', (remoteStream) => {
+        addRemoteAudio(targetPeerId, remoteStream);
+      });
+      call.on('close', () => {
+        removeRemoteAudio(targetPeerId);
+      });
+    }
+    if (showEndButton) {
+      document.getElementById('btn-end-call').classList.remove('hidden');
+    }
+  }
+
+  function endCurrentCall() {
+    activeMediaCalls.forEach(call => call.close());
+    activeMediaCalls = [];
+
+    if (rawMicStream) {
+      rawMicStream.getTracks().forEach(track => track.stop());
+      rawMicStream = null;
+      processedStream = null;
+    }
+
+    isMicActive = false;
+    const btn = document.getElementById('btn-toggle-mic');
+    btn.innerText = "Turn On Mic 🎙️";
+    btn.className = "btn btn-mazzo";
+
+    document.getElementById('remote-audio-container').innerHTML = '';
+    document.getElementById('btn-end-call').classList.add('hidden');
   }
 
   async function toggleRealMic() {
     const btn = document.getElementById('btn-toggle-mic');
-
     if (!isMicActive) {
       try {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        processedStream = applyGameMasterVoiceEffect(localStream);
-
+        await ensureAudioStream();
         isMicActive = true;
         btn.innerText = "Mute Mic 🔇";
         btn.className = "btn btn-danger";
-
-        const avatar = document.getElementById(`avatar-${currentUser}`);
-        if (avatar) avatar.classList.add('active-mic');
-
-        const allRoles = ['Mazzo', 'Noha', 'Cupo', 'Khlood'];
-        allRoles.forEach(role => {
+        ALL_ROLES.forEach(role => {
           if (role !== currentUser) {
-            const targetPeerId = 'el-laba-' + role.toLowerCase();
-            const call = peer.call(targetPeerId, processedStream || localStream);
-            if (call) {
-              call.on('stream', (remoteStream) => {
-                addRemoteAudio(targetPeerId, remoteStream);
-              });
-            }
+            callIndividualUser(role, false);
           }
         });
-
+        document.getElementById('btn-end-call').classList.remove('hidden');
       } catch (err) {
-        alert("Please grant microphone permissions to use voice call!");
+        alert("Microphone access is required!");
       }
     } else {
-      if (localStream) {
-        localStream.getAudioTracks().forEach(track => track.enabled = false);
+      if (rawMicStream) {
+        const active = !rawMicStream.getAudioTracks()[0].enabled;
+        rawMicStream.getAudioTracks()[0].enabled = active;
+        isMicActive = active;
+        btn.innerText = isMicActive ? "Mute Mic 🔇" : "Turn On Mic 🎙️";
+        btn.className = isMicActive ? "btn btn-danger" : "btn btn-mazzo";
       }
-      isMicActive = false;
-      btn.innerText = "Turn On Mic 🎙️";
-      btn.className = "btn btn-mazzo";
-
-      const avatar = document.getElementById(`avatar-${currentUser}`);
-      if (avatar) avatar.classList.remove('active-mic');
     }
   }
 
@@ -700,22 +821,56 @@
       audioElem = document.createElement('audio');
       audioElem.id = `audio-${peerId}`;
       audioElem.autoplay = true;
+      audioElem.controls = false;
+      audioElem.playsInline = true;
       container.appendChild(audioElem);
     }
     audioElem.srcObject = stream;
+    audioElem.play().catch(e => {});
+  }
+
+  function removeRemoteAudio(peerId) {
+    let audioElem = document.getElementById(`audio-${peerId}`);
+    if (audioElem) audioElem.remove();
+  }
+
+  function renderCallSection(isGameMaster) {
+    const callContainer = document.getElementById('call-users-status');
+    callContainer.innerHTML = '';
+
+    ALL_ROLES.forEach(role => {
+      const cleanAvatarId = role.replace(/\s+/g, '-');
+      const isSelf = (role === currentUser);
+
+      const userCard = document.createElement('div');
+      userCard.className = 'call-user-card';
+
+      userCard.innerHTML = `
+        <div class="call-user-avatar" id="avatar-${cleanAvatarId}">${role.charAt(0)}</div>
+        <span style="font-size: 13px; font-weight: bold;">${role}</span>
+        ${(!isSelf) ? `<button class="btn btn-small btn-cupo" onclick="callSingleUser('${role}')">Call 📞</button>` : ''}
+      `;
+
+      callContainer.appendChild(userCard);
+    });
   }
 
   function resetGame() {
-    if (confirm("Reset the entire game state?")) {
-      saveState(defaultState);
-      location.reload();
+    if (confirm("Reset game status & timer?")) {
+      let state = getState();
+      state.timerRunning = false;
+      state.timerSeconds = 0;
+      state.winner = null;
+      handledWinnerState = null;
+      state.playersStatus = { Mazzo: true, Noha: true, Cupo: true, Khlood: true };
+      state.messages.push({ sender: 'SYSTEM 🔄', text: `Game state has been reset by Game Master.` });
+      saveState(state);
     }
   }
 
   function addScore(team, value) {
     let state = getState();
     if (!state.score) state.score = { mazzo: 0, cupo: 0 };
-    
     state.score[team] = Math.max(0, (state.score[team] || 0) + value);
     state.messages.push({ sender: 'SYSTEM 📊', text: `Score updated: Team Mazzo [${state.score.mazzo}] - [${state.score.cupo}] Team Cupo` });
     saveState(state);
@@ -724,7 +879,6 @@
   function saveCustomScore() {
     const mazzoScore = parseInt(document.getElementById('input-score-mazzo').value) || 0;
     const cupoScore = parseInt(document.getElementById('input-score-cupo').value) || 0;
-
     let state = getState();
     state.score = { mazzo: Math.max(0, mazzoScore), cupo: Math.max(0, cupoScore) };
     state.messages.push({ sender: 'SYSTEM 📊', text: `Score updated: Team Mazzo [${state.score.mazzo}] - [${state.score.cupo}] Team Cupo` });
@@ -734,24 +888,16 @@
   function openStealModal() {
     const select = document.getElementById('steal-select-input');
     select.innerHTML = '';
-
-    const opposingTeamMembers = (currentUser === 'Mazzo') 
-      ? ['Cupo', 'Khlood'] 
-      : ['Mazzo', 'Noha'];
-
+    const opposingTeamMembers = (currentUser === 'Mazzo') ? ['Cupo', 'Khlood'] : ['Mazzo', 'Noha'];
     opposingTeamMembers.forEach(memberName => {
       const option = document.createElement('option');
-      option.value = memberName;
-      option.innerText = memberName;
+      option.value = memberName; option.innerText = memberName;
       select.appendChild(option);
     });
-
     document.getElementById('steal-modal').classList.remove('hidden');
   }
 
-  function closeStealModal() {
-    document.getElementById('steal-modal').classList.add('hidden');
-  }
+  function closeStealModal() { document.getElementById('steal-modal').classList.add('hidden'); }
 
   function confirmStealPower() {
     const target = document.getElementById('steal-select-input').value;
@@ -791,6 +937,17 @@
     }
   }
 
+  function sendUserChatMessage() {
+    const input = document.getElementById('user-msg-input');
+    const text = input.value.trim();
+    if (text) {
+      let state = getState();
+      state.messages.push({ sender: currentUser, text: text });
+      saveState(state);
+      input.value = '';
+    }
+  }
+
   function startTimerPrompt() {
     let minutes = prompt("Enter challenge time in minutes:", "5");
     if (minutes && !isNaN(minutes)) {
@@ -798,7 +955,8 @@
       state.timerSeconds = parseInt(minutes) * 60;
       state.timerRunning = true;
       state.winner = null;
-      videoPlayed = false;
+      handledWinnerState = null;
+      state.playersStatus = { Mazzo: true, Noha: true, Cupo: true, Khlood: true };
       saveState(state);
     }
   }
@@ -813,48 +971,45 @@
     let state = getState();
     if (currentUser && state.playersStatus[currentUser] !== undefined) {
       state.playersStatus[currentUser] = false;
-
       const mazzoDefeated = !state.playersStatus.Mazzo && !state.playersStatus.Noha;
       const cupoDefeated = !state.playersStatus.Cupo && !state.playersStatus.Khlood;
 
       if (mazzoDefeated) {
-        state.winner = 'Team Cupo';
-        state.timerRunning = false;
+        setWinner('Team Cupo', 'cupo');
       } else if (cupoDefeated) {
-        state.winner = 'Team Mazzo';
-        state.timerRunning = false;
+        setWinner('Team Mazzo', 'mazzo');
+      } else {
+        saveState(state);
       }
-
-      saveState(state);
     }
+  }
+
+  function setWinner(winningTeamName, teamKey) {
+    let state = getState();
+    state.winner = winningTeamName;
+    state.timerRunning = false;
+    if (!state.score) state.score = { mazzo: 0, cupo: 0 };
+    state.score[teamKey] = (state.score[teamKey] || 0) + 1;
+
+    // إعادة تعيين جميع اللاعبين ليعودوا Alive تلقائياً
+    state.playersStatus = { Mazzo: true, Noha: true, Cupo: true, Khlood: true };
+
+    state.messages.push({
+      sender: '🏆 AUTO ANNOUNCEMENT',
+      text: `🎉 ${winningTeamName} HAS WON THE MATCH AUTOMATICALLY! +1 Score Awarded! Current Score: Mazzo [${state.score.mazzo}] - [${state.score.cupo}] Cupo. All players are now ALIVE 🟢 for the next game.`
+    });
+
+    saveState(state);
   }
 
   function forcePlayVideo() {
     const video = document.getElementById('winner-video');
     if (video) {
-      video.muted = false;
-      video.currentTime = 0;
-      const playPromise = video.play();
-      
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.log("Autoplay blocked, playing muted first:", error);
-          video.muted = true;
-          video.play().then(() => {
-            setTimeout(() => { video.muted = false; }, 400);
-          });
-        });
-      }
-    }
-  }
-
-  function playWinnerVideoDirectly() {
-    const video = document.getElementById('winner-video');
-    if (video) {
-      video.load();
-      setTimeout(() => {
-        forcePlayVideo();
-      }, 300);
+      video.muted = false; video.currentTime = 0;
+      video.play().catch(() => {
+        video.muted = true;
+        video.play().then(() => { setTimeout(() => { video.muted = false; }, 400); });
+      });
     }
   }
 
@@ -862,10 +1017,7 @@
     const modal = document.getElementById('winner-modal');
     const video = document.getElementById('winner-video');
     modal.classList.add('hidden');
-    if (video) {
-      video.pause();
-      video.currentTime = 0;
-    }
+    if (video) { video.pause(); video.currentTime = 0; }
   }
 
   function buildMembersCardsHTML(playersStatus) {
@@ -881,7 +1033,7 @@
       return `
         <div class="member-card ${isAlive ? 'status-alive' : 'status-dead'}">
           <h4>${m.name}</h4>
-          <p style="font-size: 13px; color: #94a3b8;">${m.team} (${m.role})</p>
+          <p style="font-size: 12px; color: #94a3b8;">${m.team} (${m.role})</p>
           <span class="status-badge ${isAlive ? 'status-active' : 'status-lost'}">
             ${isAlive ? 'ALIVE 🟢' : 'LOST ❌'}
           </span>
@@ -908,18 +1060,33 @@
 
     document.getElementById('screen-login').classList.add('hidden');
     document.getElementById('screen-main').classList.remove('hidden');
-    document.getElementById('user-display-name').innerText = currentUser;
+    
+    // ضبط اسم المستخدم وتغيير اللون في الأعلى حسب الشخصية المدخلة
+    const nameElem = document.getElementById('user-display-name');
+    nameElem.innerText = currentUser;
+    nameElem.className = ''; // إعادة المسح
+
+    if (currentUser === 'Mazzo' || currentUser === 'Noha') {
+      nameElem.classList.add('user-green');
+    } else if (currentUser === 'The Game S' || currentUser === 'The Game Y') {
+      nameElem.classList.add('user-red');
+    } else if (currentUser === 'Cupo' || currentUser === 'Khlood') {
+      nameElem.classList.add('user-blue');
+    }
 
     const isGameMaster = (currentUser === 'The Game S' || currentUser === 'The Game Y');
     const isCaptain = (currentUser === 'Mazzo' || currentUser === 'Cupo');
     const isPlayer = (isCaptain || currentUser === 'Noha' || currentUser === 'Khlood');
+
+    document.getElementById('btn-call-group').classList.remove('hidden');
+    document.getElementById('voice-effect-select').classList.toggle('hidden', !isGameMaster);
+    renderCallSection(isGameMaster);
 
     const mazzoScore = state.score?.mazzo ?? 0;
     const cupoScore = state.score?.cupo ?? 0;
 
     document.getElementById('display-score-mazzo').innerText = mazzoScore;
     document.getElementById('display-score-cupo').innerText = cupoScore;
-
     document.getElementById('score-admin-controls').classList.toggle('hidden', !isGameMaster);
 
     if (isGameMaster) {
@@ -942,7 +1109,7 @@
     state.messages.forEach(msg => {
       const div = document.createElement('div');
       div.className = 'chat-msg';
-      div.innerHTML = `<span class="sender" style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px; font-weight: bold;">${msg.sender}</span><div>${msg.text}</div>`;
+      div.innerHTML = `<span style="font-size: 11px; color: #94a3b8; display: block; font-weight: bold;">${msg.sender}</span><div>${msg.text}</div>`;
       chatBox.appendChild(div);
     });
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -980,19 +1147,23 @@
       floatingWidget.classList.add('hidden');
     }
 
-    if (state.winner && !videoPlayed) {
-      const modal = document.getElementById('winner-modal');
-      const title = document.getElementById('winner-title');
+    if (state.winner) {
+      if (handledWinnerState !== state.winner) {
+        const modal = document.getElementById('winner-modal');
+        const title = document.getElementById('winner-title');
+        title.innerText = `🏆 WINNER: ${state.winner}!`;
 
-      if (state.winner === 'Team Mazzo') {
-        title.innerText = "🏆 WINNER: Team Mazzo!";
-        modal.classList.remove('hidden');
-        playWinnerVideoDirectly();
-      } else {
-        title.innerText = "🏆 WINNER: Team Cupo!";
-        modal.classList.remove('hidden');
+        if (state.winner === 'Team Mazzo') {
+          modal.classList.remove('hidden');
+          forcePlayVideo();
+        } else {
+          modal.classList.add('hidden');
+        }
+        handledWinnerState = state.winner;
       }
-      videoPlayed = true;
+    } else {
+      handledWinnerState = null;
+      document.getElementById('winner-modal').classList.add('hidden');
     }
   }
 
@@ -1003,13 +1174,20 @@
       if (state.timerSeconds <= 0) {
         state.timerRunning = false;
       }
-      saveState(state);
+      localStorage.setItem('elleba_state', JSON.stringify(state));
+      renderUI();
+      broadcastData({ type: 'SYNC_STATE', state: state });
     }
   }, 1000);
 
-  window.addEventListener('storage', renderUI);
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'elleba_state') {
+      renderUI();
+    }
+  });
+
   renderUI();
-  if (currentUser) initVoiceCall();
+  if (currentUser) initPeerNetwork();
 </script>
 </body>
 </html>
