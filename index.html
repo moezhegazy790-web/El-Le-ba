@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>EL L'eba - Interactive Esports Platform</title>
   <!-- PeerJS Library for Real Audio & Data Connection -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
@@ -19,6 +19,7 @@
       --glow-cupo: 0 0 25px rgba(59, 130, 246, 0.5);
       --glow-game: 0 0 25px rgba(244, 63, 94, 0.5);
       --glow-score: 0 0 25px rgba(245, 158, 11, 0.5);
+      --glow-lost: 0 0 35px rgba(239, 68, 68, 0.95);
     }
 
     * {
@@ -26,6 +27,7 @@
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -37,6 +39,7 @@
       flex-direction: column;
       align-items: center;
       padding: 20px;
+      overflow-x: hidden;
     }
 
     .container {
@@ -64,6 +67,10 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       position: relative;
       z-index: 10;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
     }
 
     .btn:hover { transform: translateY(-2px) scale(1.02); }
@@ -71,10 +78,37 @@
 
     .btn-small { padding: 6px 12px; font-size: 13px; border-radius: 8px; }
     .btn-danger { background: linear-gradient(135deg, #e11d48, #9f1239); border: none; box-shadow: var(--glow-game); }
-    .btn-mazzo { background: linear-gradient(135deg, #10b981, #047857); border: none; color: #fff; box-shadow: var(--glow-mazzo); }
+    .btn-mazzo { background: linear-gradient(105deg, #10b981, #047857); border: none; color: #fff; box-shadow: var(--glow-mazzo); }
     .btn-cupo { background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: none; color: #fff; box-shadow: var(--glow-cupo); }
     .btn-game { background: linear-gradient(135deg, #f43f5e, #be123c); border: none; box-shadow: var(--glow-game); }
     .btn-score { background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: #fff; box-shadow: var(--glow-score); }
+    
+    /* 💥 Prominent & Highly Clickable Lost Button */
+    .btn-lost-super {
+      background: linear-gradient(135deg, #ef4444, #991b1b) !important;
+      color: #ffffff !important;
+      font-size: 26px !important;
+      font-weight: 900 !important;
+      padding: 20px 48px !important;
+      border-radius: 20px !important;
+      border: 3px solid #fca5a5 !important;
+      box-shadow: var(--glow-lost), 0 10px 25px rgba(0,0,0,0.8) !important;
+      animation: lostPulse 1s infinite alternate;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin: 20px auto !important;
+      width: 90%;
+      max-width: 400px;
+      min-height: 65px;
+      z-index: 10000;
+      cursor: pointer;
+    }
+
+    @keyframes lostPulse {
+      0% { transform: scale(1); box-shadow: 0 0 20px rgba(239, 68, 68, 0.8); }
+      100% { transform: scale(1.06); box-shadow: 0 0 45px rgba(239, 68, 68, 1); }
+    }
+
     .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
 
     .card {
@@ -128,7 +162,7 @@
 
     .character-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 20px;
       margin-top: 20px;
     }
@@ -245,7 +279,6 @@
       max-width: 85%;
     }
 
-    /* ألوان الحدود للرسائل حسب الفريق */
     .chat-msg-mazzo { border-left-color: var(--accent-mazzo) !important; }
     .chat-msg-cupo { border-left-color: var(--accent-cupo) !important; }
     .chat-msg-game { border-left-color: var(--accent-game) !important; }
@@ -253,7 +286,7 @@
 
     .members-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 15px;
       margin-top: 15px;
     }
@@ -264,40 +297,67 @@
       border-radius: 16px;
       padding: 20px 12px;
       text-align: center;
+      transition: all 0.3s ease;
     }
 
     .member-card.status-alive { border-color: #10b981; }
     .member-card.status-dead { border-color: #ef4444; opacity: 0.5; }
 
+    /* ⚡ تصغير كروت اللعيبة عند عمل التايمر ⚡ */
+    body.timer-active .member-card {
+      padding: 8px 6px !important;
+      border-radius: 10px !important;
+      min-height: auto !important;
+    }
+    body.timer-active .member-card h4 {
+      font-size: 13px !important;
+      margin-bottom: 2px !important;
+    }
+    body.timer-active .member-card p {
+      font-size: 10px !important;
+      margin-bottom: 2px !important;
+    }
+    body.timer-active .status-badge {
+      font-size: 9px !important;
+      padding: 2px 6px !important;
+      margin-top: 2px !important;
+    }
+    body.timer-active .members-grid {
+      gap: 8px !important;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important;
+    }
+
     #lock-screen {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(4, 6, 12, 0.97);
+      background: rgba(4, 6, 12, 0.98);
       z-index: 9999;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      padding: 20px;
+      padding: 20px 15px;
+      overflow-y: auto;
     }
 
     .timer-display {
-      font-size: 80px; font-weight: 900; text-align: center;
-      color: var(--accent-game); margin: 15px 0; font-family: monospace;
+      font-size: 75px; font-weight: 900; text-align: center;
+      color: var(--accent-game); margin: 10px 0; font-family: monospace;
+      text-shadow: 0 0 20px rgba(244, 63, 94, 0.6);
     }
 
     #floating-timer-widget {
-      position: fixed; top: 20px; right: 20px; background: #1e1b2e;
-      border: 2px solid var(--accent-game); border-radius: 16px; padding: 10px 20px;
+      position: fixed; top: 15px; right: 15px; background: #1e1b2e;
+      border: 2px solid var(--accent-game); border-radius: 16px; padding: 8px 16px;
       z-index: 99999; display: flex; align-items: center; gap: 10px;
       box-shadow: var(--glow-game); backdrop-filter: blur(8px);
     }
 
-    #floating-timer-widget .time { font-size: 24px; font-weight: bold; color: var(--accent-game); font-family: monospace; }
+    #floating-timer-widget .time { font-size: 20px; font-weight: bold; color: var(--accent-game); font-family: monospace; }
 
     #steal-modal, #winner-modal {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0, 0, 0, 0.9); z-index: 100000;
+      background: rgba(0, 0, 0, 0.92); z-index: 100000;
       display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;
     }
 
@@ -311,7 +371,7 @@
     .incoming-call-card {
       background: linear-gradient(145deg, #0f172a, #1e293b);
       border: 2px solid var(--accent-mazzo);
-      border-radius: 24px; padding: 40px; text-align: center;
+      border-radius: 24px; padding: 30px; text-align: center;
       box-shadow: var(--glow-mazzo); animation: pulse 1.5s infinite;
       max-width: 400px; width: 90%;
     }
@@ -324,7 +384,7 @@
 
     .steal-card {
       background: #0f172a; border: 2px solid var(--accent-game);
-      border-radius: 20px; padding: 30px; width: 90%; max-width: 420px; text-align: center;
+      border-radius: 20px; padding: 25px; width: 90%; max-width: 420px; text-align: center;
     }
 
     .steal-select {
@@ -332,12 +392,85 @@
       background: #060913; color: white; border: 1px solid #334155;
     }
 
-    video { max-width: 90%; max-height: 60vh; border-radius: 16px; background: #000; }
+    video { max-width: 95%; max-height: 55vh; border-radius: 16px; background: #000; }
     .hidden { display: none !important; }
 
-    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-top: 6px; }
+    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-top: 4px; }
     .status-active { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
     .status-lost { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+
+    /* ==========================================================================
+       📱💻 Media Queries شاملة لجميع أنواع الشاشات والأجهزة في العالم
+       ========================================================================== */
+
+    /* 1. الشاشات الصغرى جداً والقابلة للطي (Foldable Outer Displays & Extra Small - up to 320px) */
+    @media screen and (max-width: 320px) {
+      body { padding: 8px; }
+      .card { padding: 12px; border-radius: 12px; }
+      h1 { font-size: 18px; }
+      h2 { font-size: 16px; }
+      .timer-display { font-size: 42px !important; }
+      .score-number { font-size: 32px !important; }
+      .character-grid { grid-template-columns: 1fr; gap: 10px; }
+      .char-card { padding: 15px 10px; min-height: 100px; }
+      .btn { padding: 8px 12px; font-size: 12px; margin: 2px; }
+      .btn-lost-super { font-size: 18px !important; padding: 14px 20px !important; min-height: 50px; }
+    }
+
+    /* 2. الهواتف الصغيرة إلى المتوسطة (Xiaomi Redmi 6, Huawei Y9, Older iPhones - 321px to 375px) */
+    @media screen and (min-width: 321px) and (max-width: 375px) {
+      body { padding: 10px; }
+      .card { padding: 15px; margin-bottom: 15px; }
+      .timer-display { font-size: 52px !important; }
+      .score-number { font-size: 38px !important; }
+      .character-grid { grid-template-columns: 1fr; gap: 12px; }
+      .btn-lost-super { font-size: 20px !important; padding: 16px 28px !important; }
+    }
+
+    /* 3. الهواتف الحديثة القياسية (Infinix Note 50s, iPhone 12/13/14, Samsung S Series - 376px to 430px) */
+    @media screen and (min-width: 376px) and (max-width: 430px) {
+      .timer-display { font-size: 62px !important; }
+      .score-number { font-size: 44px !important; }
+      .character-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .btn-lost-super { font-size: 22px !important; padding: 18px 36px !important; }
+    }
+
+    /* 4. الهواتف الكبيرة جداً / Plus / Max (iPhone 15 Pro Max, Galaxy Ultra - 431px to 540px) */
+    @media screen and (min-width: 431px) and (max-width: 540px) {
+      .timer-display { font-size: 70px !important; }
+      .character-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .btn-lost-super { font-size: 24px !important; padding: 20px 40px !important; }
+    }
+
+    /* 5. التابلت الصغير والأجهزة العريضة بوضع البورتريه (Phablets & Small Tablets - 541px to 768px) */
+    @media screen and (min-width: 541px) and (max-width: 768px) {
+      .container { width: 95%; }
+      .character-grid { grid-template-columns: repeat(2, 1fr); }
+      .members-grid { grid-template-columns: repeat(3, 1fr); }
+      body.timer-active .members-grid { grid-template-columns: repeat(4, 1fr) !important; }
+      .timer-display { font-size: 80px !important; }
+    }
+
+    /* 6. التابلت الكبير واللابتوبات الصغير (iPad Pro, Surface Pro, Laptops - 769px to 1024px) */
+    @media screen and (min-width: 769px) and (max-width: 1024px) {
+      .container { max-width: 900px; }
+      .character-grid { grid-template-columns: repeat(3, 1fr); }
+      .members-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    /* 7. الشاشات الكبيرة والمكتبية (Desktops & UltraWide - 1025px and above) */
+    @media screen and (min-width: 1025px) {
+      .container { max-width: 1100px; }
+      .character-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    /* 8. مراعاة الشاشات الأفقية على الهواتف (Landscape Mode on Mobile Devices) */
+    @media screen and (max-height: 500px) and (orientation: landscape) {
+      #lock-screen { padding: 10px; justify-content: flex-start; }
+      .timer-display { font-size: 40px !important; margin: 2px 0; }
+      .btn-lost-super { padding: 10px 20px !important; font-size: 16px !important; min-height: 40px; margin: 5px auto !important; }
+      .member-card { padding: 4px !important; }
+    }
   </style>
 </head>
 <body>
@@ -383,6 +516,7 @@
   <div id="screen-main" class="hidden">
     <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
       <div>Current Character: <b id="user-display-name" style="font-size: 22px; font-weight: 800;"></b></div>
+      <!-- زر Change Character يتواجد لكافة الأدوار في الوضع الطبيعي -->
       <button id="btn-change-char" class="btn btn-danger" onclick="logout()">Change Character 🔄</button>
     </div>
 
@@ -473,7 +607,7 @@
       </div>
     </div>
 
-    <!-- Status Cards -->
+    <!-- Member Status Cards -->
     <div class="card">
       <h3>📊 Member Status Cards</h3>
       <div id="members-cards-container" class="members-grid"></div>
@@ -507,7 +641,7 @@
   </div>
 </div>
 
-<!-- Floating Widget Timer (Top Right for Game Masters & Dead Players) -->
+<!-- Floating Widget Timer -->
 <div id="floating-timer-widget" class="hidden">
   <span>Challenge Active ⏳</span>
   <div class="time" id="floating-timer-time">00:00</div>
@@ -515,23 +649,21 @@
 
 <!-- Lock Screen & Challenge Timer -->
 <div id="lock-screen" class="hidden">
-  <h1 style="color: var(--accent-game); font-size: 36px;">🚨 CHALLENGE STARTED! 🚨</h1>
+  <h1 style="color: var(--accent-game); font-size: 32px;">🚨 CHALLENGE STARTED! 🚨</h1>
   <div class="timer-display" id="lock-timer">00:00</div>
 
-  <div id="captain-timer-view" class="hidden" style="width: 100%; max-width: 850px; margin: 15px 0;">
-    <h3 style="margin-bottom: 10px; color: #94a3b8;">Monitor Live Member Status:</h3>
+  <div id="captain-timer-view" class="hidden" style="width: 100%; max-width: 850px; margin: 10px 0;">
+    <h3 style="margin-bottom: 8px; color: #94a3b8; font-size: 16px;">Monitor Live Member Status:</h3>
     <div id="captain-timer-members-grid" class="members-grid"></div>
-    <div style="text-align: center; margin-top: 15px;">
-      <button class="btn btn-danger" onclick="logout()">Change Character 🔄</button>
-    </div>
   </div>
 
-  <button id="btn-lost-timer" class="btn btn-danger hidden" style="font-size: 20px; padding: 14px 40px; margin-top: 15px;" onclick="markAsLost()">LOST BUTTON ❌</button>
+  <!-- زرار Lost الواضح والمبارز للضغط المباشر والسهل -->
+  <button id="btn-lost-timer" class="btn btn-lost-super hidden" onclick="markAsLost()">LOST ❌</button>
 </div>
 
 <!-- Winner Modal Video -->
 <div id="winner-modal" class="hidden">
-  <h1 id="winner-title" style="color: #f59e0b; margin-bottom: 15px; font-size: 30px;">🏆 WINNING TEAM! 🏆</h1>
+  <h1 id="winner-title" style="color: #f59e0b; margin-bottom: 15px; font-size: 28px;">🏆 WINNING TEAM! 🏆</h1>
   <video id="winner-video" controls playsinline preload="auto" onended="closeWinnerModal()">
     <source src="winner.mp4" type="video/mp4">
     Your browser does not support the video tag.
@@ -566,7 +698,7 @@
   let isMicMuted = false;
   let handledWinnerState = null;
 
-  /* Ringtone & Call Pending Variables */
+  /* Call System Variables */
   let pendingCallObject = null;
   let pendingCallerRole = null;
 
@@ -619,12 +751,11 @@
     renderUI();
   }
 
-  /* MP3 Ringtone Controller function using file_2.mp3 */
   function playRingtoneSound() {
     const audio = document.getElementById('ringtone-audio');
     if (audio) {
       audio.currentTime = 0;
-      audio.play().catch(e => console.log("Audio play blocked by browser interaction policy"));
+      audio.play().catch(e => console.log("Audio play blocked by browser policy"));
     }
   }
 
@@ -647,8 +778,7 @@
           { urls: 'stun:stun.l.google.com:19302' },
           { urls: 'stun:stun1.l.google.com:19302' },
           { urls: 'stun:stun2.l.google.com:19302' },
-          { urls: 'stun:stun3.l.google.com:19302' },
-          { urls: 'stun:stun4.l.google.com:19302' }
+          { urls: 'stun:stun3.l.google.com:19302' }
         ]
       }
     });
@@ -735,7 +865,7 @@
       } else if (data.type === 'CALL_RESPONSE') {
         stopRingtoneSound();
         if (data.status === 'DECLINED') {
-          alert(`🚫 Call Declined / Not Answered by ${data.from || 'User'}`);
+          alert(`🚫 Call Declined by ${data.from || 'User'}`);
           endCurrentCall(false);
         }
       } else if (data.type === 'END_CALL_SIGNAL') {
@@ -814,8 +944,7 @@
       n_samples = 44100,
       curve = new Float32Array(n_samples),
       deg = Math.PI / 180,
-      i = 0,
-      x;
+      i = 0, x;
     for (; i < n_samples; ++i) {
       x = (i * 2) / n_samples - 1;
       curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
@@ -826,7 +955,6 @@
   async function startGroupCall() {
     try {
       await ensureAudioStream();
-
       playRingtoneSound();
       ALL_ROLES.forEach(role => {
         if (role !== currentUser) {
@@ -842,7 +970,6 @@
   async function callSingleUser(targetRole) {
     try {
       await ensureAudioStream();
-
       playRingtoneSound();
       callIndividualUser(targetRole, true);
     } catch (err) {
@@ -883,18 +1010,12 @@
     activeMediaCalls = [];
 
     if (rawMicStream) {
-      rawMicStream.getTracks().forEach(track => {
-        track.stop();
-        track.enabled = false;
-      });
+      rawMicStream.getTracks().forEach(track => { track.stop(); track.enabled = false; });
       rawMicStream = null;
     }
 
     if (processedStream) {
-      processedStream.getTracks().forEach(track => {
-        track.stop();
-        track.enabled = false;
-      });
+      processedStream.getTracks().forEach(track => { track.stop(); track.enabled = false; });
       processedStream = null;
     }
 
@@ -913,12 +1034,6 @@
 
     const audioContainer = document.getElementById('remote-audio-container');
     if (audioContainer) {
-      const audioElements = audioContainer.getElementsByTagName('audio');
-      for (let i = audioElements.length - 1; i >= 0; i--) {
-        audioElements[i].pause();
-        audioElements[i].srcObject = null;
-        audioElements[i].remove();
-      }
       audioContainer.innerHTML = '';
     }
 
@@ -939,17 +1054,8 @@
 
     isMicMuted = !isMicMuted;
 
-    if (rawMicStream) {
-      rawMicStream.getAudioTracks().forEach(track => {
-        track.enabled = !isMicMuted;
-      });
-    }
-
-    if (processedStream) {
-      processedStream.getAudioTracks().forEach(track => {
-        track.enabled = !isMicMuted;
-      });
-    }
+    if (rawMicStream) rawMicStream.getAudioTracks().forEach(track => track.enabled = !isMicMuted);
+    if (processedStream) processedStream.getAudioTracks().forEach(track => track.enabled = !isMicMuted);
 
     if (isMicMuted) {
       btn.innerText = "Unmute Mic 🎙️";
@@ -1208,7 +1314,7 @@
       return `
         <div class="member-card ${isAlive ? 'status-alive' : 'status-dead'}">
           <h4>${m.name}</h4>
-          <p style="font-size: 12px; color: #94a3b8;">${m.team} (${m.role})</p>
+          <p style="font-size: 11px; color: #94a3b8;">${m.team} (${m.role})</p>
           <span class="status-badge ${isAlive ? 'status-active' : 'status-lost'}">
             ${isAlive ? 'ALIVE 🟢' : 'LOST ❌'}
           </span>
@@ -1230,6 +1336,7 @@
       document.getElementById('screen-login').classList.remove('hidden');
       document.getElementById('screen-main').classList.add('hidden');
       document.getElementById('floating-timer-widget').classList.add('hidden');
+      document.body.classList.remove('timer-active');
       return;
     }
 
@@ -1283,14 +1390,13 @@
     state.messages.forEach(msg => {
       const div = document.createElement('div');
       
-      // تحديد لون الخط الجانبي حسب الراسل
       let teamClass = 'chat-msg-game';
       if (msg.sender === 'Mazzo' || msg.sender === 'Noha') {
-        teamClass = 'chat-msg-mazzo'; // أخضر
+        teamClass = 'chat-msg-mazzo';
       } else if (msg.sender === 'Cupo' || msg.sender === 'Khlood') {
-        teamClass = 'chat-msg-cupo'; // أزرق
+        teamClass = 'chat-msg-cupo';
       } else if (msg.sender.includes('SYSTEM') || msg.sender.includes('ANNOUNCEMENT')) {
-        teamClass = 'chat-msg-score'; // أصفر
+        teamClass = 'chat-msg-score';
       }
 
       div.className = `chat-msg ${teamClass}`;
@@ -1307,6 +1413,8 @@
     const playerIsAlive = state.playersStatus[currentUser] ?? true;
 
     if (state.timerRunning) {
+      // إيقاف وزيادة تركيز التنسيق عند تفعيل التايمر
+      document.body.classList.add('timer-active');
       const formattedTime = formatTime(state.timerSeconds);
       document.getElementById('lock-timer').innerText = formattedTime;
       document.getElementById('floating-timer-time').innerText = formattedTime;
@@ -1322,12 +1430,14 @@
         floatingWidget.classList.add('hidden');
       }
 
+      // إظهار زرار Lost لللاعبين وتطبيق التنسيقات المصغرة لكروت اللعيبة
       document.getElementById('btn-lost-timer').classList.toggle('hidden', !isPlayer);
       document.getElementById('captain-timer-view').classList.toggle('hidden', !isCaptain);
       if (isCaptain) {
         document.getElementById('captain-timer-members-grid').innerHTML = cardsHTML;
       }
     } else {
+      document.body.classList.remove('timer-active');
       lockScreen.classList.add('hidden');
       floatingWidget.classList.add('hidden');
     }
@@ -1351,7 +1461,6 @@
     }
   }
 
-  // التايمر يعمل كل 2000ms (ثانيتين) للحفاظ على السرعة البطيئة المطلوبة
   setInterval(() => {
     let state = getState();
     if (state.timerRunning && state.timerSeconds > 0) {
@@ -1367,7 +1476,7 @@
       renderUI();
       broadcastData({ type: 'SYNC_STATE', state: state });
     }
-  }, 2000);
+  }, 1000);
 
   window.addEventListener('storage', (e) => {
     if (e.key === 'elleba_state') {
