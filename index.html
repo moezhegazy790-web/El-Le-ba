@@ -403,7 +403,6 @@
        📱💻 Media Queries شاملة لجميع أنواع الشاشات والأجهزة في العالم
        ========================================================================== */
 
-    /* 1. الشاشات الصغرى جداً والقابلة للطي (Foldable Outer Displays & Extra Small - up to 320px) */
     @media screen and (max-width: 320px) {
       body { padding: 8px; }
       .card { padding: 12px; border-radius: 12px; }
@@ -417,7 +416,6 @@
       .btn-lost-super { font-size: 18px !important; padding: 14px 20px !important; min-height: 50px; }
     }
 
-    /* 2. الهواتف الصغيرة إلى المتوسطة (Xiaomi Redmi 6, Huawei Y9, Older iPhones - 321px to 375px) */
     @media screen and (min-width: 321px) and (max-width: 375px) {
       body { padding: 10px; }
       .card { padding: 15px; margin-bottom: 15px; }
@@ -427,7 +425,6 @@
       .btn-lost-super { font-size: 20px !important; padding: 16px 28px !important; }
     }
 
-    /* 3. الهواتف الحديثة القياسية (Infinix Note 50s, iPhone 12/13/14, Samsung S Series - 376px to 430px) */
     @media screen and (min-width: 376px) and (max-width: 430px) {
       .timer-display { font-size: 62px !important; }
       .score-number { font-size: 44px !important; }
@@ -435,14 +432,12 @@
       .btn-lost-super { font-size: 22px !important; padding: 18px 36px !important; }
     }
 
-    /* 4. الهواتف الكبيرة جداً / Plus / Max (iPhone 15 Pro Max, Galaxy Ultra - 431px to 540px) */
     @media screen and (min-width: 431px) and (max-width: 540px) {
       .timer-display { font-size: 70px !important; }
       .character-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
       .btn-lost-super { font-size: 24px !important; padding: 20px 40px !important; }
     }
 
-    /* 5. التابلت الصغير والأجهزة العريضة بوضع البورتريه (Phablets & Small Tablets - 541px to 768px) */
     @media screen and (min-width: 541px) and (max-width: 768px) {
       .container { width: 95%; }
       .character-grid { grid-template-columns: repeat(2, 1fr); }
@@ -451,20 +446,17 @@
       .timer-display { font-size: 80px !important; }
     }
 
-    /* 6. التابلت الكبير واللابتوبات الصغير (iPad Pro, Surface Pro, Laptops - 769px to 1024px) */
     @media screen and (min-width: 769px) and (max-width: 1024px) {
       .container { max-width: 900px; }
       .character-grid { grid-template-columns: repeat(3, 1fr); }
       .members-grid { grid-template-columns: repeat(4, 1fr); }
     }
 
-    /* 7. الشاشات الكبيرة والمكتبية (Desktops & UltraWide - 1025px and above) */
     @media screen and (min-width: 1025px) {
       .container { max-width: 1100px; }
       .character-grid { grid-template-columns: repeat(3, 1fr); }
     }
 
-    /* 8. مراعاة الشاشات الأفقية على الهواتف (Landscape Mode on Mobile Devices) */
     @media screen and (max-height: 500px) and (orientation: landscape) {
       #lock-screen { padding: 10px; justify-content: flex-start; }
       .timer-display { font-size: 40px !important; margin: 2px 0; }
@@ -516,7 +508,6 @@
   <div id="screen-main" class="hidden">
     <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
       <div>Current Character: <b id="user-display-name" style="font-size: 22px; font-weight: 800;"></b></div>
-      <!-- زر Change Character يتواجد لكافة الأدوار في الوضع الطبيعي -->
       <button id="btn-change-char" class="btn btn-danger" onclick="logout()">Change Character 🔄</button>
     </div>
 
@@ -565,6 +556,9 @@
         <button class="btn btn-danger" onclick="startTimerPrompt()">Start Timer & Lock Screens ⏳</button>
         <button class="btn" onclick="stopTimer()">Stop Timer 🛑</button>
         <button class="btn" onclick="resetGame()">Reset Game 🔄</button>
+        <!-- أزرار إعادة وسائل المساعدة لكباتن الفرق -->
+        <button class="btn btn-mazzo" onclick="resetCaptainPowers('Mazzo')">Reset Mazzo Powers ⚡</button>
+        <button class="btn btn-cupo" onclick="resetCaptainPowers('Cupo')">Reset Cupo Powers ⚡</button>
       </div>
     </div>
 
@@ -657,7 +651,6 @@
     <div id="captain-timer-members-grid" class="members-grid"></div>
   </div>
 
-  <!-- زرار Lost الواضح والمبارز للضغط المباشر والسهل -->
   <button id="btn-lost-timer" class="btn btn-lost-super hidden" onclick="markAsLost()">LOST ❌</button>
 </div>
 
@@ -1124,6 +1117,17 @@
     }
   }
 
+  /* ⚡ دالة إعادة ضبط الوسائل لـ Mazzo أو Cupo ⚡ */
+  function resetCaptainPowers(captainName) {
+    let state = getState();
+    if (state.powersUsed && state.powersUsed[captainName]) {
+      state.powersUsed[captainName] = { steal: false, minusCount: 0, delay: false };
+      state.messages.push({ sender: 'SYSTEM ⚡', text: `${captainName}'s powers have been restored by Game Master.` });
+      saveState(state);
+      alert(`${captainName} Powers Have Been Restored Successfully!`);
+    }
+  }
+
   function addScore(team, value) {
     let state = getState();
     if (!state.score) state.score = { mazzo: 0, cupo: 0 };
@@ -1413,7 +1417,6 @@
     const playerIsAlive = state.playersStatus[currentUser] ?? true;
 
     if (state.timerRunning) {
-      // إيقاف وزيادة تركيز التنسيق عند تفعيل التايمر
       document.body.classList.add('timer-active');
       const formattedTime = formatTime(state.timerSeconds);
       document.getElementById('lock-timer').innerText = formattedTime;
@@ -1430,7 +1433,6 @@
         floatingWidget.classList.add('hidden');
       }
 
-      // إظهار زرار Lost لللاعبين وتطبيق التنسيقات المصغرة لكروت اللعيبة
       document.getElementById('btn-lost-timer').classList.toggle('hidden', !isPlayer);
       document.getElementById('captain-timer-view').classList.toggle('hidden', !isCaptain);
       if (isCaptain) {
@@ -1461,7 +1463,6 @@
     }
   }
 
-// ✅ الكود الجديد المعدل:
   setInterval(() => {
     let state = getState();
     if (state.timerRunning && state.timerSeconds > 0) {
@@ -1477,7 +1478,7 @@
       renderUI();
       broadcastData({ type: 'SYNC_STATE', state: state });
     }
-  }, 1000); // 👈 تم تغيير القيمة إلى 1000 ثانية لتضبط السرعة الطبيعية
+  }, 1000);
 
   window.addEventListener('storage', (e) => {
     if (e.key === 'elleba_state') {
@@ -1485,7 +1486,6 @@
     }
   });
 
-  
   renderUI();
   if (currentUser) initPeerNetwork();
 </script>
